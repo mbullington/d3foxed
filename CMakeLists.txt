@@ -18,8 +18,16 @@ IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     add_subdirectory (neo/maya2md5)
   endif()
 ENDIF()  
+
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/release/base/ )
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/release/base/ )
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/release/base/ )
+
 add_subdirectory (neo/game)
 add_subdirectory (neo/d3xp)
+
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/release/ )
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/release/ )
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/release/ )
+
 add_subdirectory (neo)
-
-
