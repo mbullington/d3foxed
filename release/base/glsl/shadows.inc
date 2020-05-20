@@ -35,31 +35,13 @@ float isOccluded(sampler2DShadow map, vec2 coord, vec2 offset, float ref)
   return 1 - f;
 }
 
-mat2 getJitter()
-{
-    vec2 jitter = texture(jitterMap, frag.worldspacePosition.xy + frag.worldspacePosition.zz ).xy;
-    float cosinus = (jitter.x * 2) - 1;
-    float sinus = (jitter.y * 2) - 1;
-
-    return mat2(cosinus, sinus, -sinus, cosinus);  
+float offsetLookup(sampler2DShadow map, vec4 pos, vec2 offset, vec2 texsize) {
+    float f = texture(map, vec3(
+        pos.x + offset.x * texsize.x * pos.w, 
+        pos.z,
+        pos.w)); 
+    return f;
 }
-
-#define DECLARE_POISSON_SAMPLE(KernelSize) float poissonSample(vec2 kernel[KernelSize], vec3 pos, vec2 texsize) { \
-    mat2 rot = getJitter(); \
-\
-    float bias = 0.000; \
-    float ret = 0; \
-    for(int i=0;i<KernelSize; ++i) { \
-       vec2 offset = (rot * kernel[i]) * texsize; \
-       ret += isOccluded(shadowMap, pos.st, offset, pos.z - bias); \
-    } \
-    return ret/KernelSize; \
-}
-
-DECLARE_POISSON_SAMPLE(6)
-DECLARE_POISSON_SAMPLE(9)
-DECLARE_POISSON_SAMPLE(12)
-DECLARE_POISSON_SAMPLE(15)
 
 float getShadow(vec4 pos, vec2 coordScale, vec2 coordOffset, vec2 softness)
 {   
@@ -75,89 +57,23 @@ float getShadow(vec4 pos, vec2 coordScale, vec2 coordOffset, vec2 softness)
     pos.x += coordOffset.x;
     pos.y += coordOffset.y;
 
-//#define FILTER_POISSON6
-#define FILTER_POISSON9
-//#define FILTER_POISSON12    
-//#define FILTER_POISSON15
- 
-  vec2 texsize = coordScale * softness;
-
-#if defined(FILTER_POISSON6)
-    const vec2 kernel[6] = vec2[](
-      vec2(-0.4397209, -0.3645),
-      vec2(-0.6508484, 0.4861422),
-      vec2(0.3237945, -0.1611787),
-      vec2(0.008111006, 0.7074075),
-      vec2(0.09966598, -0.8482586),
-      vec2(0.8881027, 0.4371758)
-    );
-
-    return poissonSample(kernel, pos.xyz, texsize);
-
-#elif defined(FILTER_POISSON9)
-    const vec2 kernel[9] = vec2[](
-      vec2(0.01946597, -0.9665399),
-      vec2(-0.2643075, -0.2529854),
-      vec2(-0.6608061, -0.5971643),
-      vec2(0.5533955, -0.560185),
-      vec2(-0.6723549, 0.1494021),
-      vec2(0.8941639, 0.0498636),
-      vec2(0.3074718, 0.2643286),
-      vec2(-0.2686456, 0.9057658),
-      vec2(0.5373921, 0.8100548)
-    );
-
-    return poissonSample(kernel, pos.xyz, texsize);
-   
-#elif defined(FILTER_POISSON12)
-    const vec2 kernel[12] = vec2[](
-      vec2(0.3665185, -0.903574),
-      vec2(0.6162645, -0.4545356),
-      vec2(-0.2486034, -0.6077372),
-      vec2(0.05140426, -0.2567643),
-      vec2(-0.2610345, 0.07457025),
-      vec2(0.2511628, 0.2595751),
-      vec2(-0.6152166, -0.318685),
-      vec2(0.8690009, -0.03180576),
-      vec2(-0.9257081, 0.1798257),
-      vec2(-0.1923947, 0.5614256),
-      vec2(0.2714329, 0.7173462),
-      vec2(-0.7179349, 0.6915267)
-    );
-
-    return poissonSample(kernel, pos.xyz, texsize);
-#elif defined(FILTER_POISSON15)
-    const vec2 kernel[15] = vec2[](
-      vec2(0.3886908, 0.3622644),
-      vec2(0.01367045, 0.7141614),
-      vec2(-0.1952952, 0.261395),
-      vec2(0.167147, -0.08671506),
-      vec2(0.5340464, -0.3375779),
-      vec2(0.7503276, 0.1110756),
-      vec2(-0.02910505, -0.5694501),
-      vec2(0.3916242, -0.7194775),
-      vec2(-0.3699134, -0.1326576),
-      vec2(0.49934, 0.835238),
-      vec2(-0.8104502, 0.05760445),
-      vec2(-0.571758, 0.6056085),
-      vec2(-0.8419966, -0.3448843),
-      vec2(-0.5124402, -0.6106064),
-      vec2(-0.2231808, -0.9203894)
-    );
-
-    return poissonSample(kernel, pos.xyz, texsize);
-#else    
-    return isOccluded(shadowMap, pos.st, vec2(0,0), pos.z);
-#endif  
+    vec2 texsize = coordScale * softness;
+    float sum = 0;
+    float x, y;
+	
+    for(y = -0.0002; y <= 0.0002; y += 0.00005) {
+        for(x = -0.0002; x <= 0.0002; x += 0.00005) {
+            sum += isOccluded(shadowMap, pos.st, vec2(x, y) * (texsize * 4096), pos.z); //offsetLookup(shadowMap, pos, vec2(x, y), texsize);
+        }
+    }
+	
+    return sum / 64.0;
 }
 
-vec4 projectedShadow(vec4 pos, vec2 softness)
-{
-  float f = getShadow(pos, rpShadowCoords[0].xy, rpShadowCoords[0].zw, softness);
-
-  f = mix(1, rpShadowParams.y, f);
-
-  return vec4(f,f,f,f);
+vec4 projectedShadow(vec4 pos, vec2 softness) {
+    float f = getShadow(pos, rpShadowCoords[0].xy, rpShadowCoords[0].zw, vec2(0, 0));
+    f = mix(1, rpShadowParams.y, f);
+    return vec4(f,f,f,f);
 }
 
 vec4 getParallelShadow(vec4 pos[6], int index, vec2 softness)
@@ -212,9 +128,7 @@ vec4 parallelShadow(vec4 pos[6], float distance, vec2 softness)
   vec2 shadowmapSize = rpShadowMapSize[i].zw;
 
   softness = softness * vec2(referenceSize / shadowmapSize.x, referenceSize / shadowmapSize.y);
-
   return mix(getParallelShadow(pos, i, softness), nextCascade, nextfraction);
-  //return getParallelShadow(pos, 5, softness * softscale[5]);  
 }
 
 vec4 pointlightShadow(vec4 pos[6], vec3 toLightOrigin, vec2 softness)
