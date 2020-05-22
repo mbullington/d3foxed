@@ -27,7 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 layout(binding = 6) uniform sampler2DShadow shadowMap;
-layout(binding = 7) uniform sampler2D jitterMap;
 
 float isOccluded(sampler2DShadow map, vec2 coord, vec2 offset, float ref)
 {
@@ -43,13 +42,33 @@ float offsetLookup(sampler2DShadow map, vec4 pos, vec2 offset, vec2 texsize) {
     return f;
 }
 
-float getShadow(vec4 pos, vec2 coordScale, vec2 coordOffset, vec2 softness)
-{   
+#define PCF_NUM_SAMPLES 16
+
+const vec2 poissonDisk[ 16 ] = vec2[](
+	vec2( -0.94201624, -0.39906216 ), 
+	vec2( 0.94558609, -0.76890725 ), 
+	vec2( -0.094184101, -0.92938870 ), 
+	vec2( 0.34495938, 0.29387760 ), 
+	vec2( -0.91588581, 0.45771432 ), 
+	vec2( -0.81544232, -0.87912464 ), 
+	vec2( -0.38277543, 0.27676845 ), 
+	vec2( 0.97484398, 0.75648379 ), 
+	vec2( 0.44323325, -0.97511554 ), 
+	vec2( 0.53742981, -0.47373420 ), 
+	vec2( -0.26496911, -0.41893023 ),
+	vec2( 0.79197514, 0.19090188 ), 
+	vec2( -0.24188840, 0.99706507 ), 
+	vec2( -0.81409955, 0.91437590 ), 
+	vec2( 0.19984126, 0.78641367 ), 
+	vec2( 0.14383161, -0.14100790 )
+);
+
+float getShadow(vec4 pos, vec2 coordScale, vec2 coordOffset, vec2 softness) {   
     pos = pos / pos.w;
 
-    pos.x = pos.x/2.0 + 0.5;
-    pos.y = pos.y/2.0 + 0.5;
-    pos.z = pos.z/2.0 + 0.5;   
+    pos.x = pos.x / 2.0 + 0.5;
+    pos.y = pos.y / 2.0 + 0.5;
+    pos.z = pos.z / 2.0 + 0.5;   
 
     pos.x *= coordScale.x; 
     pos.y *= coordScale.y; 
@@ -58,16 +77,14 @@ float getShadow(vec4 pos, vec2 coordScale, vec2 coordOffset, vec2 softness)
     pos.y += coordOffset.y;
 
     vec2 texsize = coordScale * softness;
-    float sum = 0;
-    float x, y;
+    float sum = 0.0;
+
+	for ( int i = 0; i < PCF_NUM_SAMPLES; ++i ) {
+		vec2 offset = poissonDisk[ i ];
+		sum += isOccluded(shadowMap, pos.st, offset * texsize, pos.z);
+	}
 	
-    for(y = -0.0002; y <= 0.0002; y += 0.00005) {
-        for(x = -0.0002; x <= 0.0002; x += 0.00005) {
-            sum += isOccluded(shadowMap, pos.st, vec2(x, y) * (texsize * 4096), pos.z); //offsetLookup(shadowMap, pos, vec2(x, y), texsize);
-        }
-    }
-	
-    return sum / 64.0;
+    return sum / PCF_NUM_SAMPLES;
 }
 
 vec4 projectedShadow(vec4 pos, vec2 softness) {
@@ -78,6 +95,11 @@ vec4 projectedShadow(vec4 pos, vec2 softness) {
 
 vec4 getParallelShadow(vec4 pos[6], int index, vec2 softness)
 {
+  float f = getShadow(pos[index], rpShadowCoords[index].xy, rpShadowCoords[index].zw, softness);
+
+  float ret = mix(1, rpShadowParams.y, f);
+
+#if 0
   vec4 debugColors[6] = vec4[](
     vec4(1,1,1,1),
     vec4(1,0,0,1),
@@ -86,12 +108,6 @@ vec4 getParallelShadow(vec4 pos[6], int index, vec2 softness)
     vec4(0,1,1,1),
     vec4(0,0,1,1)
   );
-
-  float f = getShadow(pos[index], rpShadowCoords[index].xy, rpShadowCoords[index].zw, softness);
-
-  float ret = mix(1, rpShadowParams.y, f);
-
-#if 0
   return debugColors[index] * ret;
 #else
   return vec4(ret, ret, ret, 1);
