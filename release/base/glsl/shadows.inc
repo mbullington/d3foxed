@@ -79,12 +79,26 @@ float getShadow(vec4 pos, vec2 coordScale, vec2 coordOffset, vec2 softness) {
     vec2 texsize = coordScale * softness;
     float sum = 0.0;
 
+#if 0
 	for ( int i = 0; i < PCF_NUM_SAMPLES; ++i ) {
 		vec2 offset = poissonDisk[ i ];
 		sum += isOccluded(shadowMap, pos.st, offset * texsize, pos.z);
 	}
+
+  return sum / PCF_NUM_SAMPLES;
+#else
+  float numSamples = 0.0;
+  for ( float y = -1.0; y < 1.0; y += 0.2 ) {
+    for ( float x = -1.0; x < 1.0; x += 0.2 ) {
+      vec2 offset = vec2( x, y );
+      sum += isOccluded(shadowMap, pos.st, offset * texsize, pos.z);
+      numSamples++;
+    }
+    numSamples++;
+  }
+#endif
 	
-    return sum / PCF_NUM_SAMPLES;
+    return sum / numSamples;
 }
 
 vec4 projectedShadow(vec4 pos, vec2 softness) {

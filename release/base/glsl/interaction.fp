@@ -114,11 +114,11 @@ vec4 shadow()
 
   if(rpShadowMappingMode == 1)  
   {
-#if 1
+#if 0
     float softness = (0.003 * rpShadowParams.x);
 #else
     float lightDistance = length(frag.toLightOrigin); 
-    float softness = (0.009 * rpShadowParams.x) * (1-lightDistance/rpShadowParams.w); 
+    float softness = (0.003 * rpShadowParams.x) * (1 - ( lightDistance * 4.0 ) / rpShadowParams.w ); 
 #endif      
     shadowness = pointlightShadow(frag.shadow, frag.toLightOrigin, vec2(softness, softness));  
   }
