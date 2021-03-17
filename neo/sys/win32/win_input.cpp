@@ -948,6 +948,12 @@ int Sys_ReturnKeyboardInputEvent( const int n, int &ch, bool &state ) {
 void Sys_EndKeyboardInputEvents( void ) {
 }
 
+#if defined(_MSC_VER)
+// Warning regarding FIELD_OFFSET macro, that's defined in Windows' own headers!
+#pragma warning(push)
+#pragma warning(disable : 4644)
+#endif
+
 void Sys_QueMouseEvents( int dwElements ) {
 	int i, value;
 
@@ -1039,6 +1045,11 @@ int Sys_ReturnMouseInputEvent( const int n, int &action, int &value ) {
 	}
 	return 0;
 }
+
+#if defined(_MSC_VER)
+// Warning regarding FIELD_OFFSET macro, that's defined in Windows' own headers!
+#pragma warning(pop)
+#endif
 
 void Sys_EndMouseInputEvents( void ) { }
 
