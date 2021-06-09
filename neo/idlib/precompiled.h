@@ -201,12 +201,12 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 // Compilers for map, model, video etc. processing.
 #include "../tools/compilers/compiler_public.h"
 
+#include "sys/sys_intrinsics.h"
+
 #endif /* !GAME_DLL */
 
 
 //-----------------------------------------------------
-
-#include "sys/sys_intrinsics.h"
 
 #endif	/* __cplusplus */
 
