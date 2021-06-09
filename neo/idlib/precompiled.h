@@ -206,6 +206,8 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 
 //-----------------------------------------------------
 
+#include "sys/sys_intrinsics.h"
+
 #endif	/* __cplusplus */
 
 #endif /* !__PRECOMPILED_H__ */
