@@ -32,9 +32,9 @@ LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
 */
 
 #pragma hdrstop
+#include "precompiled.h"
 #include "Simd_Generic.h"
 #include "Simd_SSE.h"
-#include "precompiled.h"
 
 //===============================================================
 //                                                        M

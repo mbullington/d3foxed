@@ -303,7 +303,6 @@ void			Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes );
 void			Sys_GetCallStack( address_t *callStack, const int callStackSize );
 const char *	Sys_GetCallStackStr( const address_t *callStack, const int callStackSize );
 const char *	Sys_GetCallStackCurStr( int depth );
-const char *	Sys_GetCallStackCurAddressStr( int depth );
 void			Sys_ShutdownSymbols( void );
 
 // DLL loading, the path should be a fully qualified OS path to the DLL file to be loaded

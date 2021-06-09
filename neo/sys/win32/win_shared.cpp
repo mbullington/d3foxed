@@ -764,26 +764,6 @@ const char *Sys_GetCallStackCurStr( int depth ) {
 
 /*
 ==================
-Sys_GetCallStackCurAddressStr
-==================
-*/
-const char *Sys_GetCallStackCurAddressStr( int depth ) {
-	static char string[MAX_STRING_CHARS*2];
-	address_t *callStack;
-	int index, i;
-
-	callStack = (address_t *) _alloca( depth * sizeof( address_t ) );
-	Sys_GetCallStack( callStack, depth );
-
-	index = 0;
-	for ( i = depth-1; i >= 0; i-- ) {
-		index += sprintf( string+index, " -> 0x%08x", callStack[i] );
-	}
-	return string;
-}
-
-/*
-==================
 Sys_ShutdownSymbols
 ==================
 */
