@@ -677,7 +677,8 @@ address_t GetFuncAddr( address_t midPtPtr ) {
 GetCallerAddr
 ==================
 */
-address_t GetCallerAddr( long _ebp ) {
+#if !defined( NDEBUG ) && defined( _M_IX86 )
+static address_t GetCallerAddr( long _ebp ) {
 	long midPtPtr;
 	long res = 0;
 
@@ -695,6 +696,7 @@ address_t GetCallerAddr( long _ebp ) {
 label:
 	return res;
 }
+#endif
 
 /*
 ==================
@@ -704,7 +706,7 @@ Sys_GetCallStack
 ==================
 */
 void Sys_GetCallStack( address_t *callStack, const int callStackSize ) {
-#if 1 //def _DEBUG
+#if !defined( NDEBUG ) && defined( _M_IX86 )
 	int i;
 	long m_ebp;
 
