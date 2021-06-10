@@ -1022,8 +1022,6 @@ void Sys_FPU_SetPrecision( int precision ) {
 		mov			word ptr [eax], bx
 		fldcw		word ptr [eax]
 	}
-#else
-	_controlfp( _PC_64, _MCW_PC );
 #endif
 #endif
 }
