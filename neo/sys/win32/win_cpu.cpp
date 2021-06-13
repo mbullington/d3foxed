@@ -126,33 +126,13 @@ double Sys_ClockTicksPerSecond( void ) {
 ==============================================================
 */
 
-#ifdef NO_CPUID
-#undef NO_CPUID
+#if defined( _MSC_VER )
+#	include <intrin.h>
 #endif
 
-#if defined( __GNUC__ )
 static inline void CPUid( int index, int *a, int *b, int *c, int *d )
 {
-#if __x86_64__
-#define REG_b "rbx"
-#define REG_S "rsi"
-#elif __i386__
-#define REG_b "ebx"
-#define REG_S "esi"
-#endif
-	*a = *b = *c = *d = 0;
-
-	__asm__ volatile( "mov %%" REG_b ", %%" REG_S "\n\t"
-	                  "cpuid\n\t"
-	                  "xchg %%" REG_b ", %%" REG_S
-	                  : "=a"( *a ), "=S"( *b ),
-	                    "=c"( *c ), "=d"( *d )
-	                  : "0"( index ) );
-}
-#elif defined( _MSC_VER )
-#include <intrin.h>
-static inline void CPUid( int index, int *a, int *b, int *c, int *d )
-{
+#if defined( _MSC_VER )
 	int info[ 4 ] = {};
 
 	// VS2005 and up
@@ -162,30 +142,22 @@ static inline void CPUid( int index, int *a, int *b, int *c, int *d )
 	*b = info[ 1 ];
 	*c = info[ 2 ];
 	*d = info[ 3 ];
-}
+#elif defined( __GNUC__ )
+	__get_cpuid( index, a, b, c, d );
 #else
-#define NO_CPUID
-
-void Sys_FPU_SetDAZ( bool enable )
-{
-}
-
-void Sys_FPU_SetFTZ( bool enable )
-{
-}
-
-static inline bool HasDAZ() 
-{ 
-	return false; 
-}
-static inline bool HasSSE3()
-{
-	return false;
-}
+#error "Platform does not support CPUID"
 #endif
+}
 
-#if !defined( NO_CPUID )
-#define c_SSE3   ( 1 << 0 )
+enum
+{
+	CPU_FLAG_SSE1  = ( 1 << 25 ),
+	CPU_FLAG_SSE2  = ( 1 << 26 ),
+	CPU_FLAG_SSE3  = ( 1 << 0 ),
+	CPU_FLAG_SSE41 = ( 1 << 19 ),
+	CPU_FLAG_SSE42 = ( 1 << 20 ),
+};
+
 #define d_FXSAVE ( 1 << 24 )
 
 static inline bool HasDAZ()
@@ -201,185 +173,14 @@ static inline bool HasDAZ()
 	return ( d & d_FXSAVE ) == d_FXSAVE;
 }
 
-static inline bool HasSSE3()
-{
-	int a, b, c, d;
-
-	CPUid( 0, &a, &b, &c, &d );
-	if ( a < 1 )
-		return false;
-
-	CPUid( 1, &a, &b, &c, &d );
-
-	return ( c & c_SSE3 ) == c_SSE3;
-}
-
-#if defined( _M_IX86 )
-#define MXCSR_DAZ ( 1 << 6 )
-#define MXCSR_FTZ ( 1 << 15 )
-
-#ifdef _MSC_VER
-#define STREFLOP_FSTCW( cw ) \
-	do {                     \
-		short tmp;           \
-		__asm { fstcw tmp }  \
-		;                    \
-		( cw ) = tmp;        \
-	} while ( 0 )
-#define STREFLOP_FLDCW( cw ) \
-	do {                     \
-		short tmp = ( cw );  \
-		__asm { fclex }      \
-		;                    \
-		__asm { fldcw tmp }  \
-		;                    \
-	} while ( 0 )
-#define STREFLOP_STMXCSR( cw ) \
-	do {                       \
-		int tmp;               \
-		__asm { stmxcsr tmp }  \
-		;                      \
-		( cw ) = tmp;          \
-	} while ( 0 )
-#define STREFLOP_LDMXCSR( cw ) \
-	do {                       \
-		int tmp = ( cw );      \
-		__asm { ldmxcsr tmp }  \
-		;                      \
-	} while ( 0 )
-#else
-#define STREFLOP_FSTCW( cw )       \
-	do {                           \
-		asm volatile( "fstcw %0"   \
-		              : "=m"( cw ) \
-		              : );         \
-	} while ( 0 )
-#define STREFLOP_FLDCW( cw )              \
-	do {                                  \
-		asm volatile( "fclex \n fldcw %0" \
-		              :                   \
-		              : "m"( cw ) );      \
-	} while ( 0 )
-#define STREFLOP_STMXCSR( cw )     \
-	do {                           \
-		asm volatile( "stmxcsr %0" \
-		              : "=m"( cw ) \
-		              : );         \
-	} while ( 0 )
-#define STREFLOP_LDMXCSR( cw )       \
-	do {                             \
-		asm volatile( "ldmxcsr %0"   \
-		              :              \
-		              : "m"( cw ) ); \
-	} while ( 0 )
-#endif
-
-static void EnableMXCSRFlag( int flag, bool enable, const char *name )
-{
-	int sse_mode;
-
-	STREFLOP_STMXCSR( sse_mode );
-
-	if ( enable && ( sse_mode & flag ) == flag )
-	{
-		common->Printf( "%s mode is already enabled\n", name );
-		return;
-	}
-
-	if ( !enable && ( sse_mode & flag ) == 0 )
-	{
-		common->Printf( "%s mode is already disabled\n", name );
-		return;
-	}
-
-	if ( enable )
-	{
-		common->Printf( "enabling %s mode\n", name );
-		sse_mode |= flag;
-	}
-	else
-	{
-		common->Printf( "disabling %s mode\n", name );
-		sse_mode &= ~flag;
-	}
-
-	STREFLOP_LDMXCSR( sse_mode );
-}
-
-/*
-================
-Sys_FPU_SetDAZ
-================
-*/
-void Sys_FPU_SetDAZ( bool enable )
-{
-	if ( !HasDAZ() )
-	{
-		common->Printf( "this CPU doesn't support Denormals-Are-Zero\n" );
-		return;
-	}
-
-	EnableMXCSRFlag( MXCSR_DAZ, enable, "Denormals-Are-Zero" );
-}
-
-/*
-================
-Sys_FPU_SetFTZ
-================
-*/
 void Sys_FPU_SetFTZ( bool enable )
 {
-	EnableMXCSRFlag( MXCSR_FTZ, enable, "Flush-To-Zero" );
+	_MM_SET_FLUSH_ZERO_MODE( enable ? _MM_FLUSH_ZERO_ON : _MM_FLUSH_ZERO_OFF );
 }
-#else
-void Sys_FPU_SetFTZ( bool enable )
-{
-}
+
 void Sys_FPU_SetDAZ( bool enable )
 {
-}
-#endif
-#endif
-
-/*
-================
-HasCPUID
-================
-*/
-static bool HasCPUID( void ) {
-#if defined( _M_IX86 )
-	__asm
-	{
-		pushfd						// save eflags
-		pop		eax
-		test	eax, 0x00200000		// check ID bit
-		jz		set21				// bit 21 is not set, so jump to set_21
-		and		eax, 0xffdfffff		// clear bit 21
-		push	eax					// save new value in register
-		popfd						// store new value in flags
-		pushfd
-		pop		eax
-		test	eax, 0x00200000		// check ID bit
-		jz		good
-		jmp		err					// cpuid not supported
-set21:
-		or		eax, 0x00200000		// set ID bit
-		push	eax					// store new value
-		popfd						// store new value in EFLAGS
-		pushfd
-		pop		eax
-		test	eax, 0x00200000		// if bit 21 is on
-		jnz		good
-		jmp		err
-	}
-
-err:
-	return false;
-good:
-	return true;
-#else
-	return false;
-#endif
+	_MM_SET_DENORMALS_ZERO_MODE( enable ? _MM_DENORMALS_ZERO_ON : _MM_DENORMALS_ZERO_OFF );
 }
 
 #define _REG_EAX		0
@@ -487,11 +288,6 @@ static bool HasMMX( void ) {
 	return false;
 }
 
-/*
-================
-HasSSE
-================
-*/
 static bool HasSSE( void ) {
 	int regs[4];
 
@@ -499,17 +295,12 @@ static bool HasSSE( void ) {
 	CPUID( 1, regs );
 
 	// bit 25 of EDX denotes SSE existence
-	if ( regs[_REG_EDX] & ( 1 << 25 ) ) {
+	if ( regs[_REG_EDX] & CPU_FLAG_SSE1 ) {
 		return true;
 	}
 	return false;
 }
 
-/*
-================
-HasSSE2
-================
-*/
 static bool HasSSE2( void ) {
 	int regs[4];
 
@@ -521,6 +312,19 @@ static bool HasSSE2( void ) {
 		return true;
 	}
 	return false;
+}
+
+static inline bool HasSSE3()
+{
+	int a, b, c, d;
+
+	CPUid( 0, &a, &b, &c, &d );
+	if ( a < 1 )
+		return false;
+
+	CPUid( 1, &a, &b, &c, &d );
+
+	return ( c & CPU_FLAG_SSE3 ) == CPU_FLAG_SSE3;
 }
 
 /*
@@ -702,11 +506,6 @@ Sys_GetCPUId
 cpuid_t Sys_GetCPUId( void ) {
 	int flags;
 
-	// verify we're at least a Pentium or 486 with CPUID support
-	if ( !HasCPUID() ) {
-		return CPUID_UNSUPPORTED;
-	}
-
 	// check for an AMD
 	if ( IsAMD() ) {
 		flags = CPUID_AMD;
@@ -735,11 +534,9 @@ cpuid_t Sys_GetCPUId( void ) {
 	}
 
 	// check for Streaming SIMD Extensions 3 aka Prescott's New Instructions
-#ifndef NO_CPUID
 	if ( HasSSE3() ) {
 		flags |= CPUID_SSE3;
 	}
-#endif
 
 	// check for Hyper-Threading Technology
 	if ( HasHTT() ) {

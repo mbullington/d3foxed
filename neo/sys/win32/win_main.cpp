@@ -974,6 +974,8 @@ The cvar system must already be setup
 #define OSR2_BUILD_NUMBER 1111
 #define WIN98_BUILD_NUMBER 1998
 
+#include <VersionHelpers.h>
+
 void Sys_Init( void ) {
 
 	CoInitialize( NULL );
@@ -1001,54 +1003,24 @@ void Sys_Init( void ) {
 	//
 	// Windows version
 	//
-	win32.osversion.dwOSVersionInfoSize = sizeof( win32.osversion );
+	
+	/* For reasons best known to Microsoft, GetVersionEx is deprecated and 
+	 * no longer accurate on modern Windows. I've replaced the below with
+	 * the 'recommended' solution. ~hogsy */
 
-	if ( !GetVersionEx( (LPOSVERSIONINFO)&win32.osversion ) )
-		Sys_Error( "Couldn't get OS info" );
-
-	if ( win32.osversion.dwMajorVersion < 4 ) {
+	if ( !IsWindowsVersionOrGreater( 4, 0, 0 ) )
 		Sys_Error( GAME_NAME " requires Windows version 4 (NT) or greater" );
-	}
-	if ( win32.osversion.dwPlatformId == VER_PLATFORM_WIN32s ) {
-		Sys_Error( GAME_NAME " doesn't run on Win32s" );
-	}
 
-	if( win32.osversion.dwPlatformId == VER_PLATFORM_WIN32_NT ) {
-		if( win32.osversion.dwMajorVersion <= 4 ) {
-			win32.sys_arch.SetString( "WinNT (NT)" );
-		} else if( win32.osversion.dwMajorVersion == 5 && win32.osversion.dwMinorVersion == 0 ) {
-			win32.sys_arch.SetString( "Win2K (NT)" );
-		} else if( win32.osversion.dwMajorVersion == 5 && win32.osversion.dwMinorVersion == 1 ) {
-			win32.sys_arch.SetString( "WinXP (NT)" );
-		} else if ( win32.osversion.dwMajorVersion == 6 ) {
-			win32.sys_arch.SetString( "Vista" );
-		} else {
-			win32.sys_arch.SetString( "Unknown NT variant" );
-		}
-	} else if( win32.osversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS ) {
-		if( win32.osversion.dwMajorVersion == 4 && win32.osversion.dwMinorVersion == 0 ) {
-			// Win95
-			if( win32.osversion.szCSDVersion[1] == 'C' ) {
-				win32.sys_arch.SetString( "Win95 OSR2 (95)" );
-			} else {
-				win32.sys_arch.SetString( "Win95 (95)" );
-			}
-		} else if( win32.osversion.dwMajorVersion == 4 && win32.osversion.dwMinorVersion == 10 ) {
-			// Win98
-			if( win32.osversion.szCSDVersion[1] == 'A' ) {
-				win32.sys_arch.SetString( "Win98SE (95)" );
-			} else {
-				win32.sys_arch.SetString( "Win98 (95)" );
-			}
-		} else if( win32.osversion.dwMajorVersion == 4 && win32.osversion.dwMinorVersion == 90 ) {
-			// WinMe
-		  	win32.sys_arch.SetString( "WinMe (95)" );
-		} else {
-		  	win32.sys_arch.SetString( "Unknown 95 variant" );
-		}
-	} else {
-		win32.sys_arch.SetString( "unknown Windows variant" );
-	}
+	if ( IsWindows10OrGreater() )
+		win32.sys_arch.SetString( "Win10" );
+	else if ( IsWindows8Point1OrGreater() )
+		win32.sys_arch.SetString( "Win8.1" );
+	else if ( IsWindows7SP1OrGreater() )
+		win32.sys_arch.SetString( "Win7SP1" );
+	else if ( IsWindows7OrGreater() )
+		win32.sys_arch.SetString( "Win7" );
+	else
+		win32.sys_arch.SetString( "Unknown/unsupported Windows variant" );
 
 	//
 	// CPU type
@@ -1088,6 +1060,8 @@ void Sys_Init( void ) {
 		if ( win32.cpuid & CPUID_SSE3 ) {
 			string += "SSE3 & ";
 		}
+		if ( win32.cpuid & CPUID_SSE41 ) string += "SSE41 & ";
+		if ( win32.cpuid & CPUID_SSE42 ) string += "SSE42 & ";
 		if ( win32.cpuid & CPUID_HTT ) {
 			string += "HTT & ";
 		}
@@ -1101,25 +1075,28 @@ void Sys_Init( void ) {
 
 		int id = CPUID_NONE;
 		while( src.ReadToken( &token ) ) {
-			if ( token.Icmp( "generic" ) == 0 ) {
+			if ( token.Icmp( "generic" ) == 0 )
 				id |= CPUID_GENERIC;
-			} else if ( token.Icmp( "intel" ) == 0 ) {
+			else if ( token.Icmp( "intel" ) == 0 )
 				id |= CPUID_INTEL;
-			} else if ( token.Icmp( "amd" ) == 0 ) {
+			else if ( token.Icmp( "amd" ) == 0 )
 				id |= CPUID_AMD;
-			} else if ( token.Icmp( "mmx" ) == 0 ) {
+			else if ( token.Icmp( "mmx" ) == 0 )
 				id |= CPUID_MMX;
-			} else if ( token.Icmp( "3dnow" ) == 0 ) {
+			else if ( token.Icmp( "3dnow" ) == 0 )
 				id |= CPUID_3DNOW;
-			} else if ( token.Icmp( "sse" ) == 0 ) {
+			else if ( token.Icmp( "sse" ) == 0 )
 				id |= CPUID_SSE;
-			} else if ( token.Icmp( "sse2" ) == 0 ) {
+			else if ( token.Icmp( "sse2" ) == 0 )
 				id |= CPUID_SSE2;
-			} else if ( token.Icmp( "sse3" ) == 0 ) {
+			else if ( token.Icmp( "sse3" ) == 0 )
 				id |= CPUID_SSE3;
-			} else if ( token.Icmp( "htt" ) == 0 ) {
+			else if ( token.Icmp( "sse41" ) == 0 )
+				id |= CPUID_SSE41;
+			else if ( token.Icmp( "sse42" ) == 0 )
+				id |= CPUID_SSE42;
+			else if ( token.Icmp( "htt" ) == 0 )
 				id |= CPUID_HTT;
-			}
 		}
 		if ( id == CPUID_NONE ) {
 			common->Printf( "WARNING: unknown sys_cpustring '%s'\n", win32.sys_cpustring.GetString() );
