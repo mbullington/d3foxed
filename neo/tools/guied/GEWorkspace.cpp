@@ -145,7 +145,7 @@ bool rvGEWorkspace::Attach ( HWND wnd )
 
 	// Jam the workspace pointer into the userdata window long so
 	// we can retrieve the workspace from the window later
-	SetWindowLongPtr ( mWnd, GWLP_USERDATA, (LONG) this );
+	SetWindowLongPtr( mWnd, GWLP_USERDATA, ( LONG_PTR ) this );
 
 	UpdateTitle ( );
 

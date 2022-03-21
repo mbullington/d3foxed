@@ -123,7 +123,7 @@ bool rvGEApp::Initialize ( void )
 		return false;
 	}
 
-	SetClassLongPtr( mMDIFrame, GCLP_HICON, ( LONG )LoadIcon( win32.hInstance, MAKEINTRESOURCE( IDI_GUIED ) ) );
+	SetClassLongPtr( mMDIFrame, GCLP_HICON, ( LONG_PTR ) LoadIcon( win32.hInstance, MAKEINTRESOURCE( IDI_GUIED ) ) );
 
 	// Create the MDI window
 	CLIENTCREATESTRUCT ccs;
@@ -348,7 +348,7 @@ LRESULT CALLBACK rvGEApp::FrameWndProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LP
 
 			assert ( app );
 
-			SetWindowLongPtr ( hWnd, GWLP_USERDATA, (LONG)app );
+			SetWindowLongPtr( hWnd, GWLP_USERDATA, ( LONG_PTR ) app );
 
 			app->mMDIFrame = hWnd;
 

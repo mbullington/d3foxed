@@ -198,7 +198,7 @@ void rvPropertyGrid::FinishEdit ( void )
 		nmpg.mName  = item->mName;
 		nmpg.mValue = value;
 
-		if ( !SendMessage ( GetParent ( mWindow ), WM_NOTIFY, 0, (LONG)&nmpg ) )
+		if ( !SendMessage( GetParent( mWindow ), WM_NOTIFY, 0, ( LONG_PTR ) &nmpg ) )
 		{
 			mState = STATE_EDIT;
 			SetFocus ( mEdit );
@@ -281,7 +281,7 @@ int rvPropertyGrid::AddItem ( const char* name, const char* value, EItemType typ
 
 	insert = SendMessage(mWindow,LB_GETCOUNT,0,0) - ((mStyle&PGS_ALLOWINSERT)?1:0);
 
-	return SendMessage ( mWindow, LB_INSERTSTRING, insert, (LONG)item );
+	return SendMessage( mWindow, LB_INSERTSTRING, insert, ( LONG_PTR ) item );
 }
 
 /*
@@ -330,7 +330,7 @@ void rvPropertyGrid::RemoveAllItems ( void )
 		item = new rvPropertyGridItem;
 		item->mName = "";
 		item->mValue = "";
-		SendMessage ( mWindow, LB_ADDSTRING, 0, (LONG)item );
+		SendMessage( mWindow, LB_ADDSTRING, 0, ( LONG_PTR ) item );
 	}
 }
 

@@ -56,7 +56,7 @@ INT_PTR CALLBACK rvGEPropertyPage::WndProc ( HWND hwnd, UINT msg, WPARAM wParam,
 
 		page = (rvGEPropertyPage*) psp->lParam;
 
-		SetWindowLongPtr ( hwnd, GWLP_USERDATA, (LONG)page );
+		SetWindowLongPtr( hwnd, GWLP_USERDATA, ( LONG_PTR ) page );
 		page->mPage = hwnd;
 
 		page->Init ( );
