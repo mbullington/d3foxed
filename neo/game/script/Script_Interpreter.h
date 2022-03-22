@@ -60,7 +60,7 @@ private:
 
 	void				PopParms( int numParms );
 	void				PushString( const char *string );
-	void				Push( int value );
+	void				Push( intptr_t value );
 	const char			*FloatToString( float value );
 	void				AppendString( idVarDef *def, const char *from );
 	void				SetString( idVarDef *def, const char *from );
@@ -135,12 +135,13 @@ ID_INLINE void idInterpreter::PopParms( int numParms ) {
 idInterpreter::Push
 ====================
 */
-ID_INLINE void idInterpreter::Push( int value ) {
-	if ( localstackUsed + sizeof( int ) > LOCALSTACK_SIZE ) {
+ID_INLINE void idInterpreter::Push( intptr_t value ) {
+	if ( localstackUsed + sizeof( intptr_t ) > LOCALSTACK_SIZE )
+	{
 		Error( "Push: locals stack overflow\n" );
 	}
-	*( int * )&localstack[ localstackUsed ]	= value;
-	localstackUsed += sizeof( int );
+	*( intptr_t * ) &localstack[ localstackUsed ] = value;
+	localstackUsed += sizeof( intptr_t );
 }
 
 /*
