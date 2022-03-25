@@ -35,6 +35,9 @@ Event are used for scheduling tasks and for linking script commands.
 
 #define D_EVENT_MAXARGS				8
 
+// stack size of idVec3, aligned to native pointer size
+#define E_EVENT_SIZEOF_VEC ( ( sizeof( idVec3 ) + ( sizeof( intptr_t ) - 1 ) ) & ~( sizeof( intptr_t ) - 1 ) )
+
 #define D_EVENT_VOID				( ( char )0 )
 #define D_EVENT_INTEGER				'd'
 #define D_EVENT_FLOAT				'f'

@@ -48,5 +48,8 @@ build
 *.aas48
 *.proc
 
-# VSCode Generated Garbage
+# Generated Garbage
 /.vs
+/.idea
+/cmake-build-debug
+*.bak

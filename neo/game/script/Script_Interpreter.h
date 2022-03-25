@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #define __SCRIPT_INTERPRETER_H__
 
 #define MAX_STACK_DEPTH 	64
-#define LOCALSTACK_SIZE 	6144
+#define LOCALSTACK_SIZE 	( 6144 * 2 )
 
 typedef struct prstack_s {
 	int 				s;
@@ -61,6 +61,18 @@ private:
 	void				PopParms( int numParms );
 	void				PushString( const char *string );
 	void				Push( intptr_t value );
+
+	// Pulled across from dhewm3
+	inline void PushVector( const idVec3 &vector )
+	{
+		if ( localstackUsed + E_EVENT_SIZEOF_VEC > LOCALSTACK_SIZE )
+		{
+			Error( "Push: locals stack overflow\n" );
+		}
+		*( idVec3 * ) &localstack[ localstackUsed ] = vector;
+		localstackUsed += E_EVENT_SIZEOF_VEC;
+	}
+
 	const char			*FloatToString( float value );
 	void				AppendString( idVarDef *def, const char *from );
 	void				SetString( idVarDef *def, const char *from );
