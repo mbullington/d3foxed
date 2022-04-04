@@ -61,9 +61,14 @@ If you have questions concerning this license or the applicable additional terms
 #define PATHSEPERATOR_STR				"\\"
 #define PATHSEPERATOR_CHAR				'\\'
 
-#define ID_INLINE						__forceinline
-#define ID_STATIC_TEMPLATE				static
-#define ID_INLINE_EXTERN				extern ID_INLINE
+#if defined( __GNUC__ )
+#define ID_INLINE inline
+#define ID_STATIC_TEMPLATE
+#else
+#define ID_INLINE          __forceinline
+#define ID_STATIC_TEMPLATE static
+#endif
+#define ID_INLINE_EXTERN extern ID_INLINE
 
 #define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )
 

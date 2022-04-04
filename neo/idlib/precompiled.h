@@ -44,6 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define WINVER				0x501
 
+#if defined(ID_ALLOW_TOOLS)
 #if 0
 // Dedicated server hits unresolved when trying to link this way now. Likely because of the 2010/Win7 transition? - TTimo
 
@@ -61,6 +62,7 @@ If you have questions concerning this license or the applicable additional terms
 #define NO_WARN_MBCS_MFC_DEPRECATION
 #include "../tools/comafx/StdAfx.h"
 
+#endif
 #endif
 
 #include <winsock2.h>
