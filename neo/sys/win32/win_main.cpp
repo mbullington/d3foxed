@@ -98,17 +98,16 @@ Sys_Createthread
 ==================
 */
 void Sys_CreateThread(  xthread_t function, void *parms, xthreadPriority priority, xthreadInfo &info, const char *name, xthreadInfo *threads[MAX_THREADS], int *thread_count ) {
-	HANDLE temp = CreateThread(	NULL,	// LPSECURITY_ATTRIBUTES lpsa,
+	info.threadHandle = CreateThread(	NULL,	// LPSECURITY_ATTRIBUTES lpsa,
 									0,		// DWORD cbStack,
 									(LPTHREAD_START_ROUTINE)function,	// LPTHREAD_START_ROUTINE lpStartAddr,
 									parms,	// LPVOID lpvThreadParm,
 									0,		//   DWORD fdwCreate,
 									&info.threadId);
-	info.threadHandle = (int) temp;
 	if (priority == THREAD_HIGHEST) {
-		SetThreadPriority( (HANDLE)info.threadHandle, THREAD_PRIORITY_HIGHEST );		//  we better sleep enough to do this
+		SetThreadPriority( info.threadHandle, THREAD_PRIORITY_HIGHEST );		//  we better sleep enough to do this
 	} else if (priority == THREAD_ABOVE_NORMAL ) {
-		SetThreadPriority( (HANDLE)info.threadHandle, THREAD_PRIORITY_ABOVE_NORMAL );
+		SetThreadPriority( info.threadHandle, THREAD_PRIORITY_ABOVE_NORMAL );
 	}
 	info.name = name;
 	if ( *thread_count < MAX_THREADS ) {
@@ -124,9 +123,9 @@ Sys_DestroyThread
 ==================
 */
 void Sys_DestroyThread( xthreadInfo& info ) {
-	WaitForSingleObject( (HANDLE)info.threadHandle, INFINITE);
-	CloseHandle( (HANDLE)info.threadHandle );
-	info.threadHandle = 0;
+	WaitForSingleObject( info.threadHandle, INFINITE);
+	CloseHandle( info.threadHandle );
+	info.threadHandle = nullptr;
 }
 
 /*

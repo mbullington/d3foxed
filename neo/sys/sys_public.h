@@ -472,9 +472,15 @@ typedef enum {
 	THREAD_HIGHEST
 } xthreadPriority;
 
+#if defined( __WIN32 )
+typedef HANDLE xthreadHandle;
+#else
+typedef pthread_t xthreadHandle;
+#endif
+
 typedef struct {
 	const char *	name;
-	int				threadHandle;
+	xthreadHandle	threadHandle;
 	unsigned long	threadId;
 } xthreadInfo;
 
