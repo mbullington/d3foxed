@@ -127,7 +127,9 @@ double Sys_ClockTicksPerSecond( void ) {
 */
 
 #if defined( _MSC_VER )
-#	include <intrin.h>
+#include <intrin.h>
+#else
+#include <cpuid.h>
 #endif
 
 static inline void CPUid( int index, int *a, int *b, int *c, int *d )
@@ -143,7 +145,7 @@ static inline void CPUid( int index, int *a, int *b, int *c, int *d )
 	*c = info[ 2 ];
 	*d = info[ 3 ];
 #elif defined( __GNUC__ )
-	__get_cpuid( index, a, b, c, d );
+	__cpuid( index, a, b, c, d );
 #else
 #error "Platform does not support CPUID"
 #endif
@@ -565,9 +567,10 @@ cpuid_t Sys_GetCPUId( void ) {
 ===============================================================================
 */
 
-typedef struct bitFlag_s {
-	char *		name;
-	int			bit;
+typedef struct bitFlag_s
+{
+	const char *name;
+	int         bit;
 } bitFlag_t;
 
 static byte fpuState[128], *statePtr = fpuState;
@@ -582,13 +585,13 @@ static bitFlag_t controlWordFlags[] = {
 	{ "Infinity control", 12 },
 	{ "", 0 }
 };
-static char *precisionControlField[] = {
+static const char *precisionControlField[] = {
 	"Single Precision (24-bits)",
 	"Reserved",
 	"Double Precision (53-bits)",
 	"Double Extended Precision (64-bits)"
 };
-static char *roundingControlField[] = {
+static const char *roundingControlField[] = {
 	"Round to nearest",
 	"Round down",
 	"Round up",
