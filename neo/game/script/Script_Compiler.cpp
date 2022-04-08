@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ const char *idCompiler::punctuation[] = {
 	"=",  "[",  "]",  ".",  "<",  ">" ,  "&",  "|", ":",  NULL
 };
 
-opcode_t idCompiler::opcodes[] = {
+const opcode_t idCompiler::opcodes[] = {
 	{ "<RETURN>", "RETURN", -1, false, &def_void, &def_void, &def_void },
 
 	{ "++", "UINC_F", 1, true, &def_float, &def_void, &def_void },
@@ -85,7 +85,7 @@ opcode_t idCompiler::opcodes[] = {
 	{ "!=", "NE_F", 5, false, &def_float, &def_float, &def_float },
 	{ "!=", "NE_V", 5, false, &def_vector, &def_vector, &def_float },
 	{ "!=", "NE_S", 5, false, &def_string, &def_string, &def_float },
-    { "!=", "NE_E", 5, false, &def_entity, &def_entity, &def_float },
+	{ "!=", "NE_E", 5, false, &def_entity, &def_entity, &def_float },
 	{ "!=", "NE_EO", 5, false, &def_entity, &def_object, &def_float },
 	{ "!=", "NE_OE", 5, false, &def_object, &def_entity, &def_float },
 	{ "!=", "NE_OO", 5, false, &def_object, &def_object, &def_float },
@@ -207,6 +207,9 @@ idCompiler::idCompiler()
 ================
 */
 idCompiler::idCompiler() {
+	const char	**ptr;
+	int		id;
+
 	// make sure we have the right # of opcodes in the table
 	assert( ( sizeof( opcodes ) / sizeof( opcodes[ 0 ] ) ) == ( NUM_OPCODES + 1 ) );
 
@@ -227,8 +230,8 @@ idCompiler::idCompiler() {
 
 	memset( &immediate, 0, sizeof( immediate ) );
 	memset( punctuationValid, 0, sizeof( punctuationValid ) );
-	for( const char	**ptr = punctuation; *ptr != NULL; ptr++ ) {
-		int id = parserPtr->GetPunctuationId( *ptr );
+	for( ptr = punctuation; *ptr != NULL; ptr++ ) {
+		id = parserPtr->GetPunctuationId( *ptr );
 		if ( ( id >= 0 ) && ( id < 256 ) ) {
 			punctuationValid[ id ] = true;
 		}
@@ -531,7 +534,7 @@ idVarDef *idCompiler::OptimizeOpcode( const opcode_t *op, idVarDef *var_a, idVar
 		case OP_UDIV_F:		c._float = Divide( *var_b->value.floatPtr, *var_a->value.floatPtr ); type = &type_float; break;
 		case OP_UMOD_F:		c._float = ( int ) *var_b->value.floatPtr % ( int )*var_a->value.floatPtr; type = &type_float; break;
 		case OP_UOR_F:		c._float = ( int )*var_b->value.floatPtr | ( int )*var_a->value.floatPtr; type = &type_float; break;
-		case OP_UAND_F: 	c._float = ( int )*var_b->value.floatPtr & ( int )*var_a->value.floatPtr; type = &type_float; break;
+		case OP_UAND_F:		c._float = ( int )*var_b->value.floatPtr & ( int )*var_a->value.floatPtr; type = &type_float; break;
 		case OP_UINC_F:		c._float = *var_a->value.floatPtr + 1; type = &type_float; break;
 		case OP_UDEC_F:		c._float = *var_a->value.floatPtr - 1; type = &type_float; break;
 		case OP_COMP_F:		c._float = ( float )~( int )*var_a->value.floatPtr; type = &type_float; break;
@@ -583,7 +586,7 @@ idVarDef *idCompiler::EmitOpcode( const opcode_t *op, idVarDef *var_a, idVarDef 
 
 	statement = gameLocal.program.AllocStatement();
 	statement->linenumber	= currentLineNumber;
-	statement->file 		= currentFileNumber;
+	statement->file			= currentFileNumber;
 
 	if ( ( op->type_c == &def_void ) || op->rightAssociative ) {
 		// ifs, gotos, and assignments don't need vars allocated
@@ -627,8 +630,8 @@ Emits an opcode to push the variable onto the stack.
 ============
 */
 bool idCompiler::EmitPush( idVarDef *expression, const idTypeDef *funcArg ) {
-	opcode_t *op;
-	opcode_t *out;
+	const opcode_t *op;
+	const opcode_t *out;
 
 	out = NULL;
 	for( op = &opcodes[ OP_PUSH_F ]; op->name && !strcmp( op->name, "<PUSH>" ); op++ ) {
@@ -932,8 +935,8 @@ idVarDef *idCompiler::EmitFunctionParms( int op, idVarDef *func, int startarg, i
 	const idTypeDef	*funcArg;
 	idVarDef		*returnDef;
 	idTypeDef		*returnType;
-	int 			arg;
-	int 			size;
+	int				arg;
+	int				size;
 	int				resultOp;
 
 	type = func->TypeDef();
@@ -981,6 +984,25 @@ idVarDef *idCompiler::EmitFunctionParms( int op, idVarDef *func, int startarg, i
 		// need arg size seperate since script object may be NULL
 		statement_t &statement = gameLocal.program.GetStatement( gameLocal.program.NumStatements() - 1 );
 		statement.c = SizeConstant( func->value.functionPtr->parmTotal );
+		// DG: before changes I did to ParseFunctionDef(), func->value.functionPtr->parmTotal was 0
+		//     if the function declaration/prototype has been parsed already, but the
+		//     definition/implementation hadn't been parsed yet. That was wrong and sometimes
+		//     (with debug game DLLs) lead to assertions in custom scripts, because the
+		//     stack space reserved for function parameters was wrong.
+		//     Now func->value.functionPtr->parmTotal is calculated when parsing the prototype,
+		//     but func->value.functionPtr->parmSize[i] is still only calculated when parsing
+		//     the implementation (as it's not needed before and so we can tell the cases apart here).
+		//     However, savegames from before the change have script checksums
+		//     (by idProgram::CalculateChecksum()) from statements with the wrong size, so
+		//     loading them would fail as the checksum doesn't match.
+		//     Setting this flag allows using the parmTotal argSize 0 when calculating the checksum
+		//     so it matches the one from old savegames (unless something else has also changed in
+		//     the script state so they really are incompatible). That's only done when actually
+		//     loading old savegames (detected via BUILD_NUMBER/savegame.GetBuildNumber())
+		if ( op == OP_OBJECTCALL && func->value.functionPtr->parmTotal > 0
+		     && func->value.functionPtr->parmSize.Num() == 0 ) {
+			statement.flags = statement_t::FLAG_OBJECTCALL_IMPL_NOT_PARSED_YET;
+		}
 	} else {
 		EmitOpcode( op, func, SizeConstant( size ) );
 	}
@@ -1163,7 +1185,7 @@ idVarDef *idCompiler::LookupDef( const char *name, const idVarDef *baseobj ) {
 	idVarDef	*field;
 	etype_t		type_b;
 	etype_t		type_c;
-	opcode_t	*op;
+	const opcode_t	*op;
 
 	// check if we're accessing a field
 	if ( baseobj && ( baseobj->Type() == ev_object ) ) {
@@ -1196,7 +1218,7 @@ idVarDef *idCompiler::LookupDef( const char *name, const idVarDef *baseobj ) {
 					type_c = field->TypeDef()->ReturnType()->Type();
 				} else {
 					type_c = field->TypeDef()->FieldType()->Type();	// field access gets type from field
-	                if ( CheckToken( "++" ) ) {
+					if ( CheckToken( "++" ) ) {
 						if ( type_c != ev_float ) {
 							Error( "Invalid type for ++" );
 						}
@@ -1300,7 +1322,7 @@ idCompiler::GetTerm
 */
 idVarDef *idCompiler::GetTerm( void ) {
 	idVarDef	*e;
-	int 		op;
+	int			op;
 
 	if ( !immediateType && CheckToken( "~" ) ) {
 		e = GetExpression( TILDE_PRIORITY );
@@ -1460,14 +1482,14 @@ idCompiler::GetExpression
 ==============
 */
 idVarDef *idCompiler::GetExpression( int priority ) {
-	opcode_t		*op;
-	opcode_t		*oldop;
+	const opcode_t	*op;
+	const opcode_t	*oldop;
 	idVarDef		*e;
 	idVarDef		*e2;
 	const idVarDef	*oldtype;
-	etype_t 		type_a;
-	etype_t 		type_b;
-	etype_t 		type_c;
+	etype_t			type_a;
+	etype_t			type_b;
+	etype_t			type_c;
 
 	if ( priority == 0 ) {
 		return GetTerm();
@@ -1479,7 +1501,7 @@ idVarDef *idCompiler::GetExpression( int priority ) {
 		return e;
 	}
 
-	for(;;) {
+	while( 1 ) {
 		if ( ( priority == FUNCTION_PRIORITY ) && CheckToken( "(" ) ) {
 			return ParseFunctionCall( e );
 		}
@@ -1672,9 +1694,9 @@ idCompiler::ParseReturnStatement
 */
 void idCompiler::ParseReturnStatement( void ) {
 	idVarDef	*e;
-	etype_t 	type_a;
-	etype_t 	type_b;
-	opcode_t	*op;
+	etype_t		type_a;
+	etype_t		type_b;
+	const opcode_t	*op;
 
 	if ( CheckToken( ";" ) ) {
 		if ( scope->TypeDef()->ReturnType()->Type() != ev_void ) {
@@ -1745,7 +1767,7 @@ void idCompiler::ParseWhileStatement( void ) {
 		EmitOpcode( OP_GOTO, JumpTo( patch2 ), 0 );
 	} else {
 		patch1 = gameLocal.program.NumStatements();
-        EmitOpcode( OP_IFNOT, e, 0 );
+		EmitOpcode( OP_IFNOT, e, 0 );
 		ParseStatement();
 		EmitOpcode( OP_GOTO, JumpTo( patch2 ), 0 );
 		gameLocal.program.GetStatement( patch1 ).b = JumpFrom( patch1 );
@@ -2006,7 +2028,6 @@ void idCompiler::ParseObjectDef( const char *objname ) {
 	const char  *fieldname;
 	idTypeDef	newtype( ev_field, NULL, "", 0, NULL );
 	idVarDef	*oldscope;
-	int			num;
 	int			i;
 
 	oldscope = scope;
@@ -2034,7 +2055,6 @@ void idCompiler::ParseObjectDef( const char *objname ) {
 	scope = objtype->def;
 
 	// inherit all the functions
-	num = parentType->NumFunctions();
 	for( i = 0; i < parentType->NumFunctions(); i++ ) {
 		const function_t *func = parentType->GetFunction( i );
 		objtype->AddFunction( func );
@@ -2111,10 +2131,9 @@ idCompiler::ParseFunctionDef
 void idCompiler::ParseFunctionDef( idTypeDef *returnType, const char *name ) {
 	idTypeDef		*type;
 	idVarDef		*def;
-	const idVarDef	*parm;
 	idVarDef		*oldscope;
-	int 			i;
-	int 			numParms;
+	int				i;
+	int				numParms;
 	const idTypeDef	*parmType;
 	function_t		*func;
 	statement_t		*pos;
@@ -2141,15 +2160,36 @@ void idCompiler::ParseFunctionDef( idTypeDef *returnType, const char *name ) {
 		}
 	}
 
-	// check if this is a prototype or declaration
-	if ( !CheckToken( "{" ) ) {
-		// it's just a prototype, so get the ; and move on
-		ExpectToken( ";" );
-		return;
-	}
+	// DG: make sure parmTotal gets calculated when parsing prototype (not just when parsing
+	//     implementation) so calling this function/method before the implementation has been parsed
+	//     works without getting Assertions in IdInterpreter::Execute() and ::LeaveFunction()
+	//     ("st->c->value.argSize == func->parmTotal", "localstackUsed == localstackBase", see #303 and #344)
 
 	// calculate stack space used by parms
 	numParms = type->NumParameters();
+	if ( !CheckToken( "{" ) ) {
+		// it's just a prototype, so get the ; and move on
+		ExpectToken( ";" );
+		// DG: BUT only after calculating the stack space for the arguments because this
+		// function might be called before the implementation is parsed (see #303 and #344)
+		// which otherwise causes Assertions in IdInterpreter::Execute() and ::LeaveFunction()
+		// ("st->c->value.argSize == func->parmTotal", "localstackUsed == localstackBase")
+		func->parmTotal = 0;
+		for( i = 0; i < numParms; i++ ) {
+			parmType = type->GetParmType( i );
+			int size = parmType->Inherits( &type_object ) ? type_object.Size() : parmType->Size();
+			func->parmTotal += size;
+			// NOTE: Don't set func->parmSize[] yet, the workaround to keep compatibility
+			//       with old savegames checks for func->parmSize.Num() == 0
+			//       (see EmitFunctionParms() for more explanation of that workaround)
+			// Also not defining the parms yet, otherwise they're defined in a different order
+			// than before, so their .num is different which breaks compat with old savegames
+		}
+		return;
+	}
+
+
+	int totalSize = 0; // DG: totalsize might already have been calculated for the prototype, see a few lines above
 	func->parmSize.SetNum( numParms );
 	for( i = 0; i < numParms; i++ ) {
 		parmType = type->GetParmType( i );
@@ -2158,15 +2198,18 @@ void idCompiler::ParseFunctionDef( idTypeDef *returnType, const char *name ) {
 		} else {
 			func->parmSize[ i ] = parmType->Size();
 		}
-		func->parmTotal += func->parmSize[ i ];
+		totalSize += func->parmSize[ i ];
 	}
+	// DG: if parmTotal has been calculated before, it shouldn't have changed
+	assert((func->parmTotal == 0 || totalSize == func->parmTotal) && "function parameter sizes differ between protype vs implementation?!");
+	func->parmTotal = totalSize;
 
 	// define the parms
 	for( i = 0; i < numParms; i++ ) {
 		if ( gameLocal.program.GetDef( type->GetParmType( i ), type->GetParmName( i ), def ) ) {
 			Error( "'%s' defined more than once in function parameters", type->GetParmName( i ) );
 		}
-		parm = gameLocal.program.AllocDef( type->GetParmType( i ), type->GetParmName( i ), def, false );
+		gameLocal.program.AllocDef( type->GetParmType( i ), type->GetParmName( i ), def, false );
 	}
 
 	oldscope = scope;
@@ -2396,7 +2439,7 @@ void idCompiler::ParseEventDef( idTypeDef *returnType, const char *name ) {
 	const idTypeDef	*expectedType;
 	idTypeDef		*argType;
 	idTypeDef		*type;
-	int 			i;
+	int				i;
 	int				num;
 	const char		*format;
 	const idEventDef *ev;
@@ -2480,7 +2523,7 @@ Called at the outer layer and when a local statement is hit
 ================
 */
 void idCompiler::ParseDefs( void ) {
-	idStr 		name;
+	idStr		name;
 	idTypeDef	*type;
 	idVarDef	*def;
 	idVarDef	*oldscope;
@@ -2641,6 +2684,6 @@ void idCompiler::CompileFile( const char *text, const char *filename, bool toCon
 
 	compile_time.Stop();
 	if ( !toConsole ) {
-		gameLocal.Printf( "Compiled '%s': %.1f ms\n", filename, compile_time.Milliseconds() );
+		gameLocal.Printf( "Compiled '%s': %u ms\n", filename, compile_time.Milliseconds() );
 	}
 }

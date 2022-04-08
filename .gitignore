@@ -47,3 +47,9 @@ build
 
 *.aas48
 *.proc
+
+# Generated Garbage
+/.vs
+/.idea
+/cmake-build-debug
+*.bak
