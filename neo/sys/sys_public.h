@@ -472,7 +472,7 @@ typedef enum {
 	THREAD_HIGHEST
 } xthreadPriority;
 
-#if defined( __WIN32 )
+#if defined( _WIN32 )
 typedef HANDLE xthreadHandle;
 #else
 typedef pthread_t xthreadHandle;
