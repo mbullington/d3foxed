@@ -621,7 +621,7 @@ void idEvent::Save( idSaveGame *savefile ) {
 			switch( format[ i ] ) {
 				case D_EVENT_FLOAT :
 					savefile->WriteFloat( *reinterpret_cast<float *>( dataPtr ) );
-					size += sizeof( float );
+					size += sizeof( intptr_t );
 					break;
 				case D_EVENT_INTEGER :
 					savefile->WriteInt( *reinterpret_cast< int * >( dataPtr ) );
@@ -722,7 +722,7 @@ void idEvent::Restore( idRestoreGame *savefile ) {
 				switch( format[ j ] ) {
 					case D_EVENT_FLOAT :
 						savefile->ReadFloat( *reinterpret_cast<float *>( dataPtr ) );
-						size += sizeof( float );
+						size += sizeof( intptr_t );
 						break;
 					case D_EVENT_INTEGER :
 						savefile->ReadInt( *reinterpret_cast< int * >( dataPtr ) );
