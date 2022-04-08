@@ -92,7 +92,7 @@ double Sys_ClockTicksPerSecond( void ) {
 
 	if ( !ticks ) {
 		HKEY hKey;
-		LPBYTE ProcSpeed;
+		unsigned long ProcSpeed;
 		DWORD buflen, ret;
 
 		if ( !RegOpenKeyExA( HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey ) ) {
@@ -107,8 +107,9 @@ double Sys_ClockTicksPerSecond( void ) {
 				ret = RegQueryValueExA( hKey, "~mhz", NULL, NULL, (LPBYTE) &ProcSpeed, &buflen );
 			}
 			RegCloseKey( hKey );
-			if ( ret == ERROR_SUCCESS ) {
-				ticks = (double) ((unsigned long)ProcSpeed) * 1000000;
+			if ( ret == ERROR_SUCCESS )
+			{
+				ticks = ( double ) ( ProcSpeed ) *1000000;
 			}
 		}
 	}
