@@ -5,6 +5,8 @@ OPTION(ID_ALLOW_TOOLS "Compile Tools" ON)
 OPTION(ID_ALLOW_MAYA "Compile Maya Tools" ON)
 OPTION(ID_UNICODE "Use unicode version of WIN32 API" OFF)
 OPTION(ID_ENFORCE32BIT "Build 32bit on 64bit linux platform" OFF)
+# New options start here
+option(FX_BUILD_D3 "Compile the original Doom 3 game" OFF)
 
 include(setup.cmake)
 
@@ -23,8 +25,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/release/base/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/release/base/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/release/base/)
 
-add_subdirectory(neo/game)
-add_subdirectory(neo/d3xp)
+if(FX_BUILD_D3)
+    add_subdirectory(neo/game)
+    add_subdirectory(neo/d3xp)
+else()
+    add_subdirectory(neo/game_fracture)
+endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/release/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/release/)
