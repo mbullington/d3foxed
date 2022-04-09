@@ -17,6 +17,8 @@
 
 D3Foxed is a modified fork of the [fhDOOM](https://github.com/eXistence/fhDOOM) engine, which itself was a modified fork of the DOOM3 engine. Seeing as fhDOOM doesn't appear to be being developed anymore and I don't care much for retaining compatibility with Doom 3, I decided to spin my fork into it's own thing.
 
+This project also incorporates a number of fixes from [dhewm3](https://github.com/dhewm/dhewm3).
+
 Because I don't have time to dedicate 110% of my time to this project, I would recommend perhaps looking [around a bit more](#similar-projects) before choosing this fork, as there are other forks that excell in areas where this fork is unlikely to focus on.
 
 ## Changes
