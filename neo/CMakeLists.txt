@@ -594,7 +594,7 @@ IF(WIN32)
     sys/win32/win_wndproc.cpp
   )
 
-  IF(ID_ALLOW_TOOLS)
+  IF(ID_ALLOW_TOOLS AND MSVC)
     SET(SOURCES ${SOURCES}
       tools/af/DialogAF.cpp
       tools/af/DialogAF.h
