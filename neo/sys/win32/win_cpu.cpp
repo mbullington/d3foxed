@@ -372,7 +372,7 @@ static unsigned char GetAPIC_ID( void ) {
 	}
 	return (unsigned char) ((regebx & INITIAL_APIC_ID_BITS) >> 24);
 #else
-	return INITIAL_APIC_ID_BITS;
+	return ( unsigned char ) INITIAL_APIC_ID_BITS;
 #endif
 }
 

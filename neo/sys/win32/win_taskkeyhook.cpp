@@ -136,7 +136,7 @@ void DisableTaskKeys( BOOL bDisable, BOOL bBeep, BOOL bTaskMgr ) {
 		if ( bDisable ) {
 			// disable TM: set policy = 1
 			DWORD val = 1;
-			RegSetValueExA( hk, VAL_DisableTaskMgr, NULL, REG_DWORD, (BYTE*)&val, sizeof(val) );
+			RegSetValueExA( hk, VAL_DisableTaskMgr, 0, REG_DWORD, (BYTE*)&val, sizeof(val) );
 		} else {
 			// enable TM: remove policy
 			RegDeleteValueA( hk,VAL_DisableTaskMgr );
