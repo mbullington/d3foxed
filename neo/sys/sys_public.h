@@ -37,7 +37,6 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-
 // Win32
 #if defined(WIN32) || defined(_WIN32)
 
@@ -51,9 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 	#define CPUSTRING		"x86"
 #endif
 
-#define BUILD_OS_ID 0
-
-#define ALIGN16( x )					__declspec(align(16)) x
+#define BUILD_OS_ID  0
 #define PACKED
 
 #define _alloca16(x) ((void *)((((std::ptrdiff_t)_alloca((x) + 15)) + 15) & ~15))
@@ -92,7 +89,6 @@ If you have questions concerning this license or the applicable additional terms
 #define _alloca							alloca
 #define _alloca16( x )					((void *)((((std::ptrdiff_t)alloca( (x)+15 )) + 15) & ~15))
 
-#define ALIGN16( x )					x
 #define PACKED							__attribute__((packed))
 
 #define PATHSEPERATOR_STR				"/"
@@ -107,6 +103,13 @@ If you have questions concerning this license or the applicable additional terms
 #define assertmem( x, y )
 
 #endif
+
+#ifdef _MSC_VER
+#define ALIGN( x ) __declspec( align( x ) )
+#else /* __GNUC__ */
+#define ALIGN( x ) __attribute__( ( __aligned__( x ) ) )
+#endif
+#define ALIGN16( x ) ALIGN( 16 ) x
 
 #ifdef __GNUC__
 #define id_attribute(x) __attribute__(x)

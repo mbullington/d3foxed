@@ -53,3 +53,5 @@ build
 /.idea
 /cmake-build-debug
 *.bak
+/.PVS-Studio
+*.cfg
