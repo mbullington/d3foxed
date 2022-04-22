@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <lmerr.h>
 #include <lmcons.h>
 #include <lmwksta.h>
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <direct.h>
 #include <io.h>
@@ -43,6 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <comdef.h>
 #include <comutil.h>
 #include <Wbemidl.h>
+#include <tchar.h>
 
 #pragma comment (lib, "wbemuuid.lib")
 #endif
@@ -129,42 +130,40 @@ int Sys_GetVideoRam( void ) {
 #else
 	unsigned int retSize = 64;
 
-	CComPtr<IWbemLocator> spLoc = NULL;
-	HRESULT hr = CoCreateInstance( CLSID_WbemLocator, 0, CLSCTX_SERVER, IID_IWbemLocator, ( LPVOID * ) &spLoc );
-	if ( hr != S_OK || spLoc == NULL ) {
+	IWbemLocator *spLoc = nullptr;
+	HRESULT hr = CoCreateInstance( CLSID_WbemLocator, nullptr, CLSCTX_SERVER, IID_IWbemLocator, ( LPVOID * ) &spLoc );
+	if ( hr != S_OK || spLoc == nullptr ) {
 		return retSize;
 	}
 
-	CComBSTR bstrNamespace( _T( "\\\\.\\root\\CIMV2" ) );
-	CComPtr<IWbemServices> spServices;
-
 	// Connect to CIM
-	hr = spLoc->ConnectServer( bstrNamespace, NULL, NULL, 0, NULL, 0, 0, &spServices );
+	IWbemServices *spServices = nullptr;
+	hr = spLoc->ConnectServer( _bstr_t( L"\\\\.\\root\\CIMV2" ), nullptr, nullptr, nullptr, 0, nullptr, nullptr, &spServices );
 	if ( hr != WBEM_S_NO_ERROR ) {
 		return retSize;
 	}
 
 	// Switch the security level to IMPERSONATE so that provider will grant access to system-level objects.
-	hr = CoSetProxyBlanket( spServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE );
+	hr = CoSetProxyBlanket( spServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE );
 	if ( hr != S_OK ) {
 		return retSize;
 	}
 
 	// Get the vid controller
-	CComPtr<IEnumWbemClassObject> spEnumInst = NULL;
-	hr = spServices->CreateInstanceEnum( CComBSTR( "Win32_VideoController" ), WBEM_FLAG_SHALLOW, NULL, &spEnumInst );
-	if ( hr != WBEM_S_NO_ERROR || spEnumInst == NULL ) {
+	IEnumWbemClassObject *spEnumInst = nullptr;
+	hr = spServices->CreateInstanceEnum( _bstr_t( L"Win32_VideoController" ), WBEM_FLAG_SHALLOW, nullptr, &spEnumInst );
+	if ( hr != WBEM_S_NO_ERROR || spEnumInst == nullptr ) {
 		return retSize;
 	}
 
 	ULONG uNumOfInstances = 0;
-	CComPtr<IWbemClassObject> spInstance = NULL;
+	IWbemClassObject *spInstance = nullptr;
 	hr = spEnumInst->Next( 10000, 1, &spInstance, &uNumOfInstances );
 
 	if ( hr == S_OK && spInstance ) {
 		// Get properties from the object
-		CComVariant varSize;
-		hr = spInstance->Get( CComBSTR( _T( "AdapterRAM" ) ), 0, &varSize, 0, 0 );
+		VARIANT varSize;
+		hr = spInstance->Get( L"AdapterRAM", 0, &varSize, 0, 0 );
 		if ( hr == S_OK ) {
 			retSize = varSize.ulVal / ( 1024 * 1024 );
 			if ( retSize == 0 ) {
@@ -188,7 +187,7 @@ void Sys_GetCurrentMemoryStatus( sysMemoryStats_t &stats ) {
 	MEMORYSTATUSEX statex;
 	unsigned __int64 work;
 
-	memset( &statex, sizeof( statex ), 0 );
+	memset( &statex, 0, sizeof( statex ) );
 	statex.dwLength = sizeof( statex );
 	GlobalMemoryStatusEx( &statex );
 
@@ -659,6 +658,7 @@ void Sym_GetFuncInfo( long addr, idStr &module, idStr &funcName ) {
 GetFuncAddr
 ==================
 */
+#if !defined( NDEBUG ) && defined( _M_IX86 )
 address_t GetFuncAddr( address_t midPtPtr ) {
 	long temp;
 	do {
@@ -677,7 +677,6 @@ address_t GetFuncAddr( address_t midPtPtr ) {
 GetCallerAddr
 ==================
 */
-#if !defined( NDEBUG ) && defined( _M_IX86 )
 static address_t GetCallerAddr( long _ebp ) {
 	long midPtPtr;
 	long res = 0;

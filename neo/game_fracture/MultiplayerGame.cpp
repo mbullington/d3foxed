@@ -127,7 +127,7 @@ void idMultiplayerGame::SetMenuSkin( void ) {
 	idStr skin;
 	int skinId = 1;
 	int count = 1;
-	while ( str.Length() ) {
+	while ( str.Length() > 0 ) {
 		int n = str.Find( ";" );
 		if ( n >= 0 ) {
 			skin = str.Left( n );
@@ -1159,8 +1159,6 @@ idMultiplayerGame::CycleTourneyPlayers
 ================
 */
 void idMultiplayerGame::CycleTourneyPlayers( ) {
-	int i;
-	idEntity *ent;
 	idPlayer *player;
 
 	currentTourneyPlayer[ 0 ] = -1;
@@ -1174,12 +1172,12 @@ void idMultiplayerGame::CycleTourneyPlayers( ) {
 	}
 	FillTourneySlots( );
 	// force selected players in/out of the game and update the ranks
-	for ( i = 0 ; i < gameLocal.numClients ; i++ ) {
+	for ( int i = 0 ; i < gameLocal.numClients ; i++ ) {
 		if ( currentTourneyPlayer[ 0 ] == i || currentTourneyPlayer[ 1 ] == i ) {
 			player = static_cast<idPlayer *>( gameLocal.entities[ i ] );
 			player->ServerSpectate( false );
 		} else {
-			ent = gameLocal.entities[ i ];
+			idEntity *ent = gameLocal.entities[ i ];
 			if ( ent && ent->IsType( idPlayer::Type ) ) {
 				player = static_cast<idPlayer *>( gameLocal.entities[ i ] );
 				player->ServerSpectate( true );
