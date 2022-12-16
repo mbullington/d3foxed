@@ -413,6 +413,11 @@ void idClass::Init( void ) {
 		typenums[ c->typeNum ] = c;
 	}
 
+	types.Sort( []( idTypeInfo *const *a, idTypeInfo *const *b )
+	            {
+		            return idStr::Cmp( ( *a )->classname, ( *b )->classname );
+	            } );
+
 	initialized = true;
 
 	gameLocal.Printf( "...%i classes, %i bytes for event callbacks\n", types.Num(), eventCallbackMemory );
