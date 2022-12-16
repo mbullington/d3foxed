@@ -29,10 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#if defined( MACOS_X )
-#include <signal.h>
-#include <sys/types.h>
-#include <unistd.h>
+#if defined( __unix )
+#include <csignal>
 #endif
 
 /*
@@ -579,7 +577,14 @@ idCVar com_assertOutOfDebugger("com_assertOutOfDebugger", "0", CVAR_BOOL,
 void AssertFailed( const char *file, int line, const char *expression ) {
 	idLib::Warning("\n\nASSERTION FAILED!\n%s(%d): '%s'\n", file, line, expression);
 
+#if defined( _MSC_VER )
 	if (IsDebuggerPresent() || com_assertOutOfDebugger.GetBool()) {
 		__debugbreak();
 	}
+#else
+	if ( com_assertOutOfDebugger.GetBool() )
+	{
+		std::raise( SIGTRAP );
+	}
+#endif
 }

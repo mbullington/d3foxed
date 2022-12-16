@@ -98,6 +98,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ASSERT							assert
 
 #define ID_INLINE						inline
+#define ID_INLINE_EXTERN 				extern ID_INLINE
 #define ID_STATIC_TEMPLATE
 
 #define assertmem( x, y )
