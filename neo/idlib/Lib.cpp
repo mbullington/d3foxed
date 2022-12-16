@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#if defined( __unix )
+#if !defined( _WIN32 )
 #include <csignal>
 #endif
 
@@ -577,7 +577,7 @@ idCVar com_assertOutOfDebugger("com_assertOutOfDebugger", "0", CVAR_BOOL,
 void AssertFailed( const char *file, int line, const char *expression ) {
 	idLib::Warning("\n\nASSERTION FAILED!\n%s(%d): '%s'\n", file, line, expression);
 
-#if defined( _MSC_VER )
+#if defined( _WIN32 )
 	if (IsDebuggerPresent() || com_assertOutOfDebugger.GetBool()) {
 		__debugbreak();
 	}
