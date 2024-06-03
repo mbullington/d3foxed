@@ -2447,7 +2447,9 @@ void idCompiler::ParseEventDef( idTypeDef *returnType, const char *name ) {
 
 	ev = idEventDef::FindEvent( name );
 	if ( !ev ) {
-		Error( "Unknown event '%s'", name );
+		Warning( "Unknown event '%s'", name );
+		SkipToSemicolon();
+		return;
 	}
 
 	// set the return type

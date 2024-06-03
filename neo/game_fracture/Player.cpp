@@ -1328,7 +1328,8 @@ void idPlayer::Init( void ) {
 	value = spawnArgs.GetString( "bone_hips", "" );
 	hipJoint = animator.GetJointHandle( value );
 	if ( hipJoint == INVALID_JOINT ) {
-		gameLocal.Error( "Joint '%s' not found for 'bone_hips' on '%s'", value, name.c_str() );
+		gameLocal.Warning( "Joint '%s' not found for 'bone_hips' on '%s'", value, name.c_str() );
+		return;
 	}
 
 	value = spawnArgs.GetString( "bone_chest", "" );
