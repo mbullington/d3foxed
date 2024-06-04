@@ -221,8 +221,8 @@ struct display_t {
 	char name[64];
 };
 
-typedef unsigned long address_t;
-typedef unsigned long long uint64;
+typedef uintptr_t address_t;
+typedef uint64_t  uint64;
 
 template<class type> class idList;		// for Sys_ListFiles, Sys_ListDisplays
 

@@ -78,12 +78,12 @@ typedef unsigned int			dword;		// 32 bits
 typedef unsigned int			uint;
 typedef unsigned long			ulong;
 
-typedef unsigned int   uint32;
-typedef signed   int   int32;
-typedef unsigned short uint16;
-typedef signed   short int16;
-typedef unsigned long long uint64;
-typedef signed long long   int64;
+typedef uint32_t uint32;
+typedef int32_t  int32;
+typedef uint16_t uint16;
+typedef int16_t  int16;
+typedef uint64_t uint64;
+typedef int64_t  int64;
 
 static_assert(sizeof(uint64) == 8 && sizeof(int64) == 8, "");
 static_assert(sizeof(uint32) == 4 && sizeof(int32) == 4, "");
