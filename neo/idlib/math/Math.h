@@ -177,8 +177,8 @@ public:
 	static float				Rint( float f );			// returns the nearest integer
 	static int					Ftoi( float f );			// float to int conversion
 	static int					FtoiFast( float f );		// fast float to int conversion but uses current FPU round mode (default round nearest)
-	static unsigned long		Ftol( float f );			// float to long conversion
-	static unsigned long		FtolFast( float );			// fast float to long conversion but uses current FPU round mode (default round nearest)
+	static unsigned int			Ftol( float f );			// float to long conversion
+	static unsigned int			FtolFast( float );			// fast float to long conversion but uses current FPU round mode (default round nearest)
 
 	static signed char			ClampChar( int i );
 	static signed short			ClampShort( int i );
@@ -235,11 +235,11 @@ private:
 
 ID_INLINE float idMath::RSqrt( float x ) {
 
-	long i;
+	int i;
 	float y, r;
 
 	y = x * 0.5f;
-	i = *reinterpret_cast<long *>( &x );
+	i = *reinterpret_cast<int *>( &x );
 	i = 0x5f3759df - ( i >> 1 );
 	r = *reinterpret_cast<float *>( &i );
 	r = r * ( 1.5f - r * r * y );
@@ -821,18 +821,12 @@ ID_INLINE int idMath::FtoiFast( float f ) {
 #endif
 }
 
-ID_INLINE unsigned long idMath::Ftol( float f ) {
-	return (unsigned long) f;
+ID_INLINE unsigned int idMath::Ftol( float f ) {
+	return (unsigned int) f;
 }
 
-ID_INLINE unsigned long idMath::FtolFast( float f ) {
-#if defined(_WIN32) && defined(_M_IX86)
-	// FIXME: this overflows on 31bits still .. same as FtoiFast
-	unsigned long i;
-	__asm fld		f
-	__asm fistp		i		// use default rouding mode (round nearest)
-	return i;
-#elif 0						// round chop (C/C++ standard)
+ID_INLINE unsigned int idMath::FtolFast( float f ) {
+#if 0						// round chop (C/C++ standard)
 	int i, s, e, m, shift;
 	i = *reinterpret_cast<int *>(&f);
 	s = i >> IEEE_FLT_SIGN_BIT;
@@ -841,17 +835,8 @@ ID_INLINE unsigned long idMath::FtolFast( float f ) {
 	shift = e - IEEE_FLT_MANTISSA_BITS;
 	return ( ( ( ( m >> -shift ) | ( m << shift ) ) & ~( e >> 31 ) ) ^ s ) - s;
 //#elif defined( __i386__ )
-#elif 0
-	// for some reason, on gcc I need to make sure i == 0 before performing a fistp
-	int i = 0;
-	__asm__ __volatile__ (
-						  "fld %1\n" \
-						  "fistp %0\n" \
-						  : "=m" (i) \
-						  : "m" (f) );
-	return i;
 #else
-	return (unsigned long) f;
+	return (unsigned int) f;
 #endif
 }
 
