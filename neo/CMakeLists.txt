@@ -1019,6 +1019,12 @@ if (UNIX)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/sys/linux/oss/include)
     add_definitions(-Dlinux)
     add_definitions(-DXTHREADS)
+
+    # Link seems to fail with the new policy, at least for me
+    if(POLICY CMP0072)
+        cmake_policy(SET CMP0072 OLD)
+    endif()
+
     FIND_PACKAGE(OpenGL REQUIRED)
     FIND_PACKAGE(OpenAL REQUIRED)
 
