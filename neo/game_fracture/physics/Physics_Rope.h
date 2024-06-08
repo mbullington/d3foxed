@@ -41,7 +41,6 @@ namespace ms
 	private:
 		struct Particle
 		{
-			idVec3 newPosition;// where we want to move to
 			idVec3 position;   // our actual position
 			idVec3 oldPosition;// the last actual position
 
@@ -67,16 +66,16 @@ namespace ms
 				return;
 			}
 
-			Particle start = particles[ 0 ];
-			Particle end   = particles[ particles.size() - 1 ];
+			Particle start = particles.front();
+			Particle end   = particles.back();
 
 			Detach( true );
 			Detach( false );
 
 			particles.resize( num );
 
-			particles[ 0 ]       = start;
-			particles[ num - 1 ] = end;
+			particles.front() = start;
+			particles.back()  = end;
 		}
 
 		void Attach( const idVec3 &position, bool start )
@@ -93,7 +92,7 @@ namespace ms
 				return;
 			}
 
-			particles[ start ? 0 : particles.size() ].fixed = false;
+			particles[ start ? 0 : particles.size() - 1 ].fixed = false;
 		}
 
 	private:
