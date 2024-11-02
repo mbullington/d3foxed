@@ -1,4 +1,3 @@
 
-
-const int BUILD_NUMBER = 1417;
-const char* ENGINE_VERSION = "fhDOOM 1.5.3 (snapshot)";
+const int   BUILD_NUMBER   = GIT_COMMIT_COUNT;
+const char *ENGINE_VERSION = "D3Foxed 1.0.0 (" GIT_BRANCH ")";

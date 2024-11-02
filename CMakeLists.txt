@@ -10,6 +10,34 @@ option(FX_BUILD_D3 "Compile the original Doom 3 game" OFF)
 
 include(setup.cmake)
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+
+# Get the current working branch
+execute_process(
+        COMMAND git rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_BRANCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+        COMMAND git log -1 --format=%h
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+# Get the number of commits on the working branch
+execute_process(
+        COMMAND git rev-list HEAD --count
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_COMMIT_COUNT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+add_definitions(-DGIT_COMMIT_COUNT=${GIT_COMMIT_COUNT})
+add_definitions(-DGIT_BRANCH="${GIT_BRANCH}")
+
 include_directories(neo/renderer)
 include_directories(neo/glew)
 add_subdirectory(neo/idlib)

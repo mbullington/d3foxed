@@ -96,14 +96,8 @@ SET(SOURCES
   math/Rotation.h
   math/Simd.cpp
   math/Simd.h
-  #math/Simd_3DNow.cpp
-  #math/Simd_3DNow.h
-  #math/Simd_AltiVec.cpp
-  #math/Simd_AltiVec.h
   math/Simd_Generic.cpp
   math/Simd_Generic.h
-  #math/Simd_MMX.cpp
-  #math/Simd_MMX.h
   math/Simd_SSE.cpp
   math/Simd_SSE.h
   #math/Simd_SSE2.cpp
