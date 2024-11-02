@@ -15,7 +15,7 @@
 
 ## About
 
-D3Foxed is a modified fork of the [fhDOOM](https://github.com/eXistence/fhDOOM) engine, which itself was a modified fork of the DOOM3 engine. Seeing as fhDOOM doesn't appear to be being developed anymore and I don't care much for retaining compatibility with Doom 3, I decided to spin my fork into it's own thing.
+D3Foxed is a modified fork of the [fhDOOM](https://github.com/eXistence/fhDOOM) engine, which itself was a modified fork of the DOOM3 engine. Seeing as fhDOOM doesn't appear to be being developed anymore and I don't care much for retaining compatibility with Doom 3, I decided to spin my fork into its own thing.
 
 This project also incorporates a number of fixes from [dhewm3](https://github.com/dhewm/dhewm3).
 
@@ -90,35 +90,36 @@ See also [changes.md](changes.md) for complete history of all changes.
 
 ## FAQ
 
-### Q1. Are Mods supported?
+### Are Mods supported?
 
 Yes!
-Mod support is pretty much the same as in vanilla Doom3 1.3.1 (only difference: game dll is named 'fhGame-x86' instead of 'gamex86').
+Mod support is pretty much the same as in vanilla Doom3 1.3.1. 
+The only difference: game dll is named 'fxgame-x86' or 'fxgame-x64' (depending on your target architecture) instead of 'gamex86'.
 
-### Q2. Is D3Foxed compatible with mods for vanilla Doom3 1.3.1?
+### Is D3Foxed compatible with mods for vanilla Doom3 1.3.1?
 
 It depends.
 Pure content mods containing only textures, scripts, maps and such things should work just fine (only exception: custom ARB2 shaders won't work).
 Mods that come with a compiled game dll (gamex86.dll on windows, gamex86.so on linux) won't work. Those game dlls must be recompiled for D3Foxed.
 
-### Q3. Can i use SikkMod with D3Foxed?
+### Can I use SikkMod with D3Foxed?
 
 No, because SikkMod is based on ARB2 shaders (see Q2).
 
-### Q4. Can i use HD texture mods (Wulfen, Monoxead, etc.) with D3Foxed?
+### Can I use HD texture mods (Wulfen, Monoxead, etc.) with D3Foxed?
 
 Yes (see Q2).
 
-### Q5. How do i (re)compile a mods game dll for D3Foxed?
+### How do I (re)compile a mods game dll for D3Foxed?
 
-Unfortunately that's currently not that easy. You have basically two options:
+Unfortunately, that's currently not that easy. You have two options:
 
  1. If you don't care about existing installations of officially released D3Foxed binaries, you could just clone the latest D3Foxed version from github. You apply your changes to the game code and distribute the whole thing (executable and game dlls).
  2. You clone the D3Foxed version from github that matches the latest official binary release. You apply your changes to the game code and distribute only the game dll to the user (the user must have D3Foxed installed). Pretty much like vanilla Doom3 1.3.1.
 
 Both options are far from being good, but since i am working for the most part on the engine itself and not on the game code, i never felt the need to improve this. If you want to make a mod and need to compile your own game dll, let me know. If there is enough interest in better support for this, i will set up and release some kind of SDK to easily compile only the game code.
 
-### Q6. Does multiplayer work?
+### Does multiplayer work?
 
 I suppose it does... but i don't know for sure. Feel free to test it out and share your findings :)
 
@@ -199,7 +200,7 @@ fhDOOM added and changed a couple of cvars. This list of cvars might be interest
     * simple super sampling
     * fast switching between different r_modes
     * simplifies messy fullscreen switch
-* i am pretty sure i forgot a lot of things, so you might discover more things that are pretty hacky or not working at all ;)
+* I am pretty sure I forgot a lot of things, so you might discover more things that are pretty hacky or not working at all ;)
 
 ## Building D3Foxed
 
