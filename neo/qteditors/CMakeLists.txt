@@ -23,7 +23,7 @@ add_force_include(precompiled.h SOURCES)
 add_msvc_precompiled_header(precompiled.h SOURCES)
 
 set(TARGET_NAME "qteditors")
-add_definitions(-DGLEW_STATIC -D__DOOM__ -D__DOOM_DLL__)
+add_definitions(-DGLEW_STATIC -D__DOOM__)
 add_library(${TARGET_NAME} STATIC ${SOURCES})
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND ID_ENFORCE32BIT=OFF)
   add_dependencies(${TARGET_NAME} fhGame-x64 fhGame-roe-x64)
