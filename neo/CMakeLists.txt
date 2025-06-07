@@ -1074,6 +1074,14 @@ add_executable(${TARGET_NAME} ${SOURCES})
 target_link_libraries(${TARGET_NAME} ${LINK_LIBS})
 get_property(GAME_TARGET_NAME GLOBAL PROPERTY GLOB_GAME_TARGET_NAME)
 get_property(D3XP_TARGET_NAME GLOBAL PROPERTY GLOB_D3XP_TARGET_NAME)
+if (GAME_TARGET_NAME)
+    target_link_libraries(${TARGET_NAME}
+            "-Wl,--whole-archive" ${GAME_TARGET_NAME} "-Wl,--no-whole-archive")
+endif()
+if (D3XP_TARGET_NAME)
+    target_link_libraries(${TARGET_NAME}
+            "-Wl,--whole-archive" ${D3XP_TARGET_NAME} "-Wl,--no-whole-archive")
+endif()
 add_dependencies(${TARGET_NAME} ${GAME_TARGET_NAME} ${D3XP_TARGET_NAME})
 
 if (Qt5Widgets_FOUND)

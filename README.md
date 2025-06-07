@@ -238,6 +238,15 @@ Setup:
   * `dist_nopatch`: same as `dist` but without the files from the 1.31 patch
   * `sdk`: generates a SDK to build only a game dll for D3Foxed (this is currently not used, not sure if its still working)
 
+### Static build on Linux
+
+The CMake setup already links the `game_fracture` module directly into `fhDOOM`.
+Avoid defining `__DOOM_DLL__` or `GAME_DLL` when configuring to produce a self-contained executable. The build uses `--whole-archive` so that all game objects, including script events, are linked in. Simply run cmake followed by make.
+### Creating an AppImage
+
+After building, run `scripts/create_appimage.sh` to bundle the game.
+It expects `release/fhDOOM` and the `release/base` data directory and uses `appimagetool` to create `fhDOOM.AppImage`.
+
 ### Similar Projects
 
   There exist other forks of the DOOM3 engine and even id software released a modernized version of DOOM3 and its engine as "DOOM 3 - BFG Edition".

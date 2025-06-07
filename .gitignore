@@ -55,3 +55,4 @@ build
 *.bak
 /.PVS-Studio
 *.cfg
+fhDOOM.AppImage
