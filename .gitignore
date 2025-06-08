@@ -42,6 +42,7 @@ build
 
 /release/*.exe
 /release/base/*.dll
+/release/fhDOOM
 
 /release/prototyping/*
 

@@ -1039,6 +1039,9 @@ if (UNIX)
 
     set(LINK_LIBS
             idlib
+            "-Wl,--whole-archive"
+            fxgame-x64
+            "-Wl,--no-whole-archive"
             #    curl
             glew
             jpeg-6
@@ -1068,7 +1071,7 @@ if (Qt5Widgets_FOUND)
 endif ()
 
 set(TARGET_NAME "fhDOOM")
-add_definitions(-DGLEW_STATIC -D__DOOM__ -D__DOOM_DLL__)
+add_definitions(-DGLEW_STATIC -D__DOOM__)
 add_executable(${TARGET_NAME} ${SOURCES})
 target_link_libraries(${TARGET_NAME} ${LINK_LIBS})
 get_property(GAME_TARGET_NAME GLOBAL PROPERTY GLOB_GAME_TARGET_NAME)
@@ -1184,6 +1187,7 @@ IF (WIN32)
             COMMAND ${CMAKE_COMMAND} -E copy_directory "game" "${SDK_DIR}/src/game"
             COMMAND ${CMAKE_COMMAND} -E copy_directory "d3xp" "${SDK_DIR}/src/d3xp"
             COMMAND ${CMAKE_COMMAND} -E copy_directory "idlib" "${SDK_DIR}/src/idlib"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "game_fracture" "${SDK_DIR}/src/game_fracture"
             COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/neo/cm/CollisionModel.h" "${SDK_DIR}/src/cm"
             COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/neo/framework/BuildDefines.h" "${SDK_DIR}/src/framework"
             COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/neo/framework/BuildVersion.h" "${SDK_DIR}/src/framework"

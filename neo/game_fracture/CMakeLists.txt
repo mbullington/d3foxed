@@ -138,7 +138,6 @@ SET(SOURCES
         WorldSpawn.cpp
         WorldSpawn.h
         precompiled.h
-        ../framework/BuildVersion.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -160,8 +159,8 @@ ELSE ()
     set(GAME_TARGET_NAME "fxgame-x86")
 ENDIF ()
 
-add_definitions(-D__DOOM__ -DGAME_DLL)
-add_library(${GAME_TARGET_NAME} SHARED ${SOURCES})
+add_definitions(-D__DOOM__)
+add_library(${GAME_TARGET_NAME} ${SOURCES})
 target_link_libraries(${GAME_TARGET_NAME} idlib)
 set_property(TARGET ${GAME_TARGET_NAME} PROPERTY FOLDER dlls)
 set_cpu_arch(${GAME_TARGET_NAME})

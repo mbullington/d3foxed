@@ -238,6 +238,12 @@ Setup:
   * `dist_nopatch`: same as `dist` but without the files from the 1.31 patch
   * `sdk`: generates a SDK to build only a game dll for D3Foxed (this is currently not used, not sure if its still working)
 
+### Static build on Linux
+
+The CMake setup already links the `game_fracture` module directly into `fhDOOM`.
+
+Avoid defining `__DOOM_DLL__` or `GAME_DLL` when configuring to produce a self-contained executable. Run `./cmake_linux.sh clang-libc++ release` then run `ninja` in the corresponding build directory.
+
 ### Similar Projects
 
   There exist other forks of the DOOM3 engine and even id software released a modernized version of DOOM3 and its engine as "DOOM 3 - BFG Edition".

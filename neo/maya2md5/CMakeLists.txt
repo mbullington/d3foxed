@@ -34,7 +34,7 @@ IF(IS_DIRECTORY ${MAYA_HOME})
   )
 
   include_directories("${MAYA_HOME}/include")
-  add_definitions(-DID_TYPEINFO -D__DOOM_DLL__ -DID_ENABLE_CURL=0)
+  add_definitions(-DID_TYPEINFO -DID_ENABLE_CURL=0)
   add_executable(maya2md5 ${SOURCES})
   target_link_libraries(maya2md5
     idlib
